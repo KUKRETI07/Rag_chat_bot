@@ -1,4 +1,7 @@
 import os
+from dotenv import load_dotenv
+
+# LangChain imports (compatible with the fixed versions)
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import HuggingFaceEmbeddings
@@ -7,7 +10,6 @@ from langchain_mistralai import ChatMistralAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain.chains import create_retrieval_chain
-from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
@@ -58,12 +60,12 @@ def initialize_rag():
     api_key = os.getenv("MISTRAL_API_KEY")
     if not api_key:
         print("Warning: MISTRAL_API_KEY not found in environment variables.")
-        # We can still initialize, but it might fail on invocation if not provided later or handled
+        api_key = "dummy_key"  # to prevent crash on init
     
     llm = ChatMistralAI(
         model="mistral-small-latest",
         temperature=0.1,
-        api_key=api_key if api_key else "dummy_key" # Prevent crash on init, will fail on run if invalid
+        api_key=api_key
     )
 
     prompt_template = ChatPromptTemplate.from_messages(
@@ -84,7 +86,6 @@ def initialize_rag():
 def run_llm(prompt: str) -> str:
     global rag_chain
     if rag_chain is None:
-        # Try to initialize if not already done (lazy load)
         initialize_rag()
         if rag_chain is None:
             return "Error: RAG pipeline is not initialized. Please check server logs."
@@ -95,5 +96,5 @@ def run_llm(prompt: str) -> str:
     except Exception as e:
         return f"Error running RAG: {str(e)}"
 
-# Initialize on module load (optional, or call explicitly in main.py)
-# initialize_rag() 
+# Optional: initialize on module load
+# initialize_rag()
