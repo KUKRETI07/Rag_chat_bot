@@ -1,0 +1,26 @@
+{
+    "8a694856-0d66-41ed-a1e4-6348f36b09e4": [
+        {
+            "role": "user",
+            "content": "What is the policy regarding sick leave and remote team collaboration?",
+            "timestamp": "2025-11-24T10:28:52.220325"
+        },
+        {
+            "role": "assistant",
+            "content": "Based on the provided context, the company's policy regarding sick leave is as follows:\n\n- Employees may take sick days as needed.\n- If you're taking frequent unplanned sick days, your manager will check in with you.\n- Excessive use of sick time may result in disciplinary measures.\n- If you have a medical condition that you know will take you away from work regularly, you should work with your People Ops team and your manager.\n- The company does not pay out for unused sick time upon resignation or termination.\n- In some cases, you may be required to file a short-term disability claim.\n\nHowever, the context does not provide specific information about remote team collaboration in relation to sick leave. Therefore, I cannot provide details on that aspect based on the given context.",
+            "timestamp": "2025-11-24T10:28:55.229409"
+        }
+    ],
+    "2b273064-392f-42b3-b3ef-ffbecfa910de": [
+        {
+            "role": "user",
+            "content": "What is the policy regarding sick leave and remote team collaboration?",
+            "timestamp": "2025-11-24T10:29:35.561999"
+        },
+        {
+            "role": "assistant",
+            "content": "Based on the provided context, the company's policy regarding sick leave is as follows:\n\n- Employees may take sick days as needed.\n- If you're taking frequent unplanned sick days, your manager will check in with you.\n- Excessive use of sick time may result in disciplinary measures.\n- If you have a medical condition that you know will take you away from work regularly, you should work with your People Ops team and your manager.\n- The company does not pay out for unused sick time upon resignation or termination.\n- In case of longer absences, you may be required to file a short-term disability claim.\n\nHowever, the context does not provide specific information about remote team collaboration in relation to sick leave. Therefore, I cannot provide details on that aspect based on the given information.",
+            "timestamp": "2025-11-24T10:29:37.253269"
+        }
+    ]
+}
