@@ -8,11 +8,11 @@ langchain-community==0.0.38
 langchain-core==0.1.52
 langchain-text-splitters==0.0.2
 langchain-mistralai==0.1.0
-langchain-chroma==0.0.7  # downgrade to match langchain-core 0.1.52
+langchain-chroma==0.0.7
 
 # PDF and embeddings
 pypdf==6.3.0
 sentence-transformers==5.1.2
-chromadb==0.3.30  # match the older version compatible with langchain-chroma 0.0.7
+chromadb==0.3.30
 
 python-dotenv
