@@ -1,39 +1,21 @@
+# FastAPI Server Dependencies (Used in main.py)
 fastapi
-uvicorn
-python-multipart
-python-dotenv
+uvicorn[standard]  # [standard] includes dependencies like httptools and ujson for better performance
+pydantic           # Used for the BaseModel imports (ChatRequest, ChatResponse, etc. in models.py)
+python-multipart   # Used by FastAPI for form data, good to include
+python-dotenv      # Used for load_dotenv()
 
-# LangChain (compatible set)
-langchain==0.2.16
-langchain-core==0.2.38
-langchain-community==0.2.16
-langchain-text-splitters==0.2.4
-langchain-chroma==0.1.4
-langchain-mistralai==0.1.13
+# LangChain and RAG Dependencies (Used in rag.py)
+langchain-core
+langchain-community
+langchain-text-splitters
+langchain-chroma
+langchain-mistralai
 
-# Vector DB
-chromadb==0.5.5
+# CRITICAL for the create_..._chain imports in rag.py
+langchain-classic
 
-# Embeddings (works on Python 3.11)
-sentence-transformers==3.0.1
-
-# Torch (Python 3.11 compatible)
-torch==2.7.1
-
-# Common dependency
-numpy==1.26.4
-pypdf
-
-# Pin LangChain to old compatible versions
-langchain==0.1.20
-langchain-core==0.1.52
-langchain-community==0.0.38
-langchain-text-splitters==0.0.2
-langchain-mistralai==0.1.0
-langchain-chroma==1.0.0
-
-# Other dependencies
-pypdf==6.4.0
-sentence-transformers==2.2.2  # Compatible with old LangChain
-chromadb==0.3.30               # Older version to avoid conflicts
-python-dotenv==1.2.1
+# Underlying ML/Vector Store/File Handling Libraries
+sentence-transformers # For HuggingFaceEmbeddings
+chromadb              # For Chroma vector store
+pypdf                 # For PyPDFLoader
