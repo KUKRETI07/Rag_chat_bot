@@ -39,4 +39,3 @@ pypdf==6.4.0
 sentence-transformers==2.2.2  # Compatible with old LangChain
 chromadb==0.3.30               # Older version to avoid conflicts
 python-dotenv==1.2.1
->>>>>>> 982b5a603bfe027dbb3fab84e6f68782e6cf25e1
