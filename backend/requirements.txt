@@ -1,7 +1,6 @@
 fastapi
 uvicorn
 python-multipart
-<<<<<<< HEAD
 python-dotenv
 
 # LangChain (compatible set)
@@ -24,7 +23,6 @@ torch==2.7.1
 # Common dependency
 numpy==1.26.4
 pypdf
-=======
 
 # Pin LangChain to old compatible versions
 langchain==0.1.20
