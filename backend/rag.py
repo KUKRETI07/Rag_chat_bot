@@ -5,26 +5,26 @@ from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_chroma import Chroma
 from langchain_mistralai import ChatMistralAI
 from langchain_core.prompts import ChatPromptTemplate
+# Keep these imports consistent with your requirements.txt:
 from langchain_classic.chains.combine_documents import create_stuff_documents_chain
 from langchain_classic.chains import create_retrieval_chain
 from dotenv import load_dotenv
-from typing import Optional # Added for type hinting clarity
+from typing import Optional
 
-# --- Configuration ---
+# --- Configuration & Globals ---
 load_dotenv()
 PERSIST_DIRECTORY = "./chroma_db_handbook"
 PDF_PATH = "combined_handbook.pdf"
-MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2" # Low-memory model for deployment
+# CRITICAL: Using a low-memory model to minimize RAM spike
+MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2" 
 
-# --- Global Components ---
-# The rag_chain will hold the fully initialized RAG pipeline (retriever + LLM)
+# Global variable to store the initialized chain
+# Must be initialized to None before being used by the main application logic
 rag_chain: Optional[create_retrieval_chain] = None
 
 
 def get_embeddings_model():
     """Initializes and returns the low-memory HuggingFaceEmbeddings model."""
-    print("Initializing embeddings model...")
-    # Using 'cpu' is important to avoid potential dependency on GPU libraries
     return HuggingFaceEmbeddings(
         model_name=MODEL_NAME,
         model_kwargs={"device": "cpu"}
@@ -33,9 +33,8 @@ def get_embeddings_model():
 
 def initialize_rag():
     """
-    Initializes the RAG pipeline.
-    CRITICAL: It loads the Vector Store from disk if it exists, skipping the
-    expensive embedding process on every startup.
+    Initializes the RAG pipeline. Loads the Vector Store from disk if it exists 
+    to prevent the Out-of-Memory (OOM) error during server startup.
     """
     global rag_chain
 
@@ -46,28 +45,31 @@ def initialize_rag():
     embeddings = get_embeddings_model()
     vector_store = None
 
-    # 1. ATTEMPT TO LOAD FROM PERSISTENCE (LOW MEMORY)
-    # Checks if the directory exists AND has content (a simple existence check is sometimes insufficient)
+    # 1. ATTEMPT TO LOAD FROM PERSISTENCE (LOW MEMORY PATH)
+    # Check if the directory exists AND contains files (meaning it has been persisted)
     if os.path.exists(PERSIST_DIRECTORY) and os.listdir(PERSIST_DIRECTORY):
         print(f"Loading existing Vector Store from: {PERSIST_DIRECTORY}")
         try:
+            # This step only reads files from disk and should be LOW memory
             vector_store = Chroma(
                 persist_directory=PERSIST_DIRECTORY,
                 embedding_function=embeddings,
                 collection_name="handbook_data"
             )
+            print("Vector Store loaded successfully from disk.")
         except Exception as e:
-            # Fallback if loading fails for some reason
-            print(f"Error loading Chroma from disk: {e}. Attempting to re-create.")
+            # Fallback in case of corruption or partial load
+            print(f"Error loading Chroma from disk: {e}. Proceeding to re-create.")
 
-    # 2. CREATE NEW VECTOR STORE (HIGH MEMORY)
+    # 2. CREATE NEW VECTOR STORE (HIGH MEMORY PATH)
     if vector_store is None:
         print(f"Vector Store not found or failed to load. Creating new store...")
 
         if not os.path.exists(PDF_PATH):
-            print(f"FATAL ERROR: {PDF_PATH} not found. Cannot build RAG.")
+            print(f"FATAL ERROR: {PDF_PATH} not found. Cannot build RAG. Ensure PDF is in root.")
             return
 
+        # --- Memory Intensive Steps ---
         print("Loading and splitting PDF...")
         loader = PyPDFLoader(PDF_PATH)
         documents = loader.load()
@@ -77,7 +79,7 @@ def initialize_rag():
         )
         chunks = text_splitter.split_documents(documents)
         
-        # This is the memory-intensive step. It runs only here.
+        # This is the memory-intensive embedding and index building step
         vector_store = Chroma.from_documents(
             documents=chunks,
             embedding=embeddings,
@@ -85,18 +87,16 @@ def initialize_rag():
             collection_name="handbook_data"
         )
         
-        # Manually persist to ensure the files are written immediately
+        # Ensure data is written to disk immediately
         vector_store.persist() 
         print("New Vector Store created and persisted successfully.")
         
-    # --- 3. Initialize LLM and Chain ---
+    # --- 3. Initialize LLM and Final Chain (Low Memory) ---
     
-    # Retrieve the API key
     api_key = os.getenv("MISTRAL_API_KEY")
     if not api_key:
-         # Use a dummy key; invocation will fail if the real one isn't set on Render
-         print("Warning: MISTRAL_API_KEY not found.") 
-         api_key = "dummy_key" 
+         print("Warning: MISTRAL_API_KEY not found. Invocation will fail if key is required.") 
+         api_key = "dummy_key" # Prevent initialization crash
          
     llm = ChatMistralAI(
         model="mistral-small-latest",
@@ -124,19 +124,16 @@ def initialize_rag():
 
 def run_llm(prompt: str) -> str:
     """
-    Invokes the pre-loaded RAG chain. It handles uninitialized state gracefully.
+    Invokes the pre-loaded RAG chain.
     """
     global rag_chain
     
-    # Simple check for the chain existence
     if rag_chain is None:
         return "Error: RAG pipeline is not initialized. Check server logs for deployment failure."
     
     try:
-        # Use the pre-initialized global chain
         response = rag_chain.invoke({"input": prompt})
         return response["answer"]
     except Exception as e:
-        # Log the error on the server side
         print(f"Error during RAG invocation: {str(e)}") 
         return f"An internal error occurred while processing your request: {str(e)}"
